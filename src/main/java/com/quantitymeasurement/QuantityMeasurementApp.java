@@ -1,29 +1,37 @@
 package com.quantitymeasurement;
 
-import java.util.Scanner;
-
 public class QuantityMeasurementApp {
 
+	// Static method to demonstrate Length equality
+	public static boolean demonstrateLengthEquality(Length l1, Length l2) {
+		return l1.equals(l2);
+	}
+
+	// Static method to demonstrate Feet equality
+	public static void demonstrateFeetEquality() {
+		Length feet1 = new Length(1.0, Length.LengthUnit.FEET);
+		Length feet2 = new Length(1.0, Length.LengthUnit.FEET);
+		System.out.println("Feet equality: " + demonstrateLengthEquality(feet1, feet2));
+	}
+
+	// Static method to demonstrate Inches equality
+	public static void demonstrateInchesEquality() {
+		Length inch1 = new Length(1.0, Length.LengthUnit.INCHES);
+		Length inch2 = new Length(1.0, Length.LengthUnit.INCHES);
+		System.out.println("Inches equality: " + demonstrateLengthEquality(inch1, inch2));
+	}
+
+	// Static method to demonstrate Feet and Inches comparison
+	public static void demonstrateFeetInchesComparison() {
+		Length feet1 = new Length(1.0, Length.LengthUnit.FEET);
+		Length inch12 = new Length(12.0, Length.LengthUnit.INCHES);
+		System.out.println("Feet vs Inches equality: " + demonstrateLengthEquality(feet1, inch12));
+	}
+
+	// Main method
 	public static void main(String[] args) {
-		Scanner sc=new Scanner(System.in);
-		
-		// Feet Measurement
-		System.out.println("Enter First Entry (Feet) : ");
-		double inputOne = sc.nextDouble();
-		System.out.println("Enter Second Entry (Feet) : ");
-		double inputTwo = sc.nextDouble();
-		Feet f1 = new Feet(inputOne);
-        Feet f2 = new Feet(inputTwo);
-        System.out.println("Are equal? " + f1.equals(f2));
-        // Inches Measurement 
-        System.out.println("Enter First Entry (Inch) : ");
-        double inputOneInch = sc.nextDouble();
-        System.out.println("Enter Second Entry (Inch) : ");
-        double inputTwoInch = sc.nextDouble();
-        Inches i1 = new Inches(inputOneInch);
-        Inches i2 = new Inches(inputTwoInch);
-        System.out.println("Are equal? " + i1.equals(i2));
-	
-        
+		demonstrateFeetEquality();
+		demonstrateInchesEquality();
+		demonstrateFeetInchesComparison();
 	}
 }
