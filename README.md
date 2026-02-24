@@ -77,17 +77,6 @@
 - Existing behaviour is preserved through continuous refactoring.
 - Design evolves toward clean, maintainable, and well-tested software.
 
-### 📄 License
-
-> This project is licensed under the MIT License.
-
-### 👨‍💻 Author
-
-**Raghav Sharma**  
-_Java developer focused on clean design, object-oriented programming, and incremental software Test-Driven Development._
-
----
-
 <div align="center">
 ✨ Incrementally developed using Test-Driven Development and continuous refactoring.
 </div>
