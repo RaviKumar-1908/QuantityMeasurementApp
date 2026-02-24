@@ -81,12 +81,6 @@
 
 > This project is licensed under the MIT License.
 
-### 👨‍💻 Author
-
-**Raghav Sharma**  
-_Java developer focused on clean design, object-oriented programming, and incremental software Test-Driven Development._
-
----
 
 <div align="center">
 ✨ Incrementally developed using Test-Driven Development and continuous refactoring.
