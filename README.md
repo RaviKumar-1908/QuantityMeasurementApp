@@ -23,6 +23,17 @@
   - Refactors unit-specific classes into a unified `Length` abstraction using a `LengthUnit` enum.
   - Eliminates duplicated logic by applying the DRY principle while enabling cross-unit equality comparison.
 
+- 🧩 **UC4 – Extended Unit Support :**
+  - Adds Yards and Centimeters to the `LengthUnit` enum with appropriate conversion factors.
+  - Demonstrates scalability of the generic design by enabling seamless cross-unit equality without introducing new classes.
+
+- 🧩 **UC5 – Unit-to-Unit Conversion :**
+  - Introduces explicit conversion operations between supported length units using centralized enum conversion factors.
+  - Extends the `Length` API to convert measurements across units while preserving mathematical equivalence and precision.
+
+- 🧩 **UC6 – Length Addition Operation :**
+  - Introduces addition between length measurements with automatic unit normalization and conversion.
+  - Returns a new immutable `Length` result expressed in the unit of the first operand while preserving mathematical accuracy.
 
 ### 🧰 Tech Stack
 
@@ -76,7 +87,6 @@
 - Each Use Case introduces new functionality in small, controlled steps.
 - Existing behaviour is preserved through continuous refactoring.
 - Design evolves toward clean, maintainable, and well-tested software.
-
 
 
 <div align="center">
