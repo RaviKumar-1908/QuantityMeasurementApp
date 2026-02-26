@@ -47,6 +47,10 @@
   - Introduces a weight measurement category with `Weight` and `WeightUnit` supporting kilograms, grams, and pounds.
   - Enables equality, conversion, and addition operations for weight while preserving strict separation from length measurements and stabilizing the shared measurement architecture.
 
+- 🧩 **UC10 – Generic Quantity Architecture :**
+  - Introduces a generic `Quantity<U extends IMeasurable>` model enabling multiple measurement categories through a shared abstraction.
+  - Eliminates category-specific duplication by unifying equality, conversion, and addition logic into a single scalable architecture.
+
 ### 🧰 Tech Stack
 
 - **Java 17+** — core language and application development  
@@ -100,6 +104,7 @@
 - Each Use Case introduces new functionality in small, controlled steps.
 - Existing behaviour is preserved through continuous refactoring.
 - Design evolves toward clean, maintainable, and well-tested software.
+
 
 
 <div align="center">
