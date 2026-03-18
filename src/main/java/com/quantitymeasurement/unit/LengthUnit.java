@@ -1,9 +1,5 @@
-package com.quantitymeasurement.units;
 
-import com.quantitymeasurement.interfaces.IMeasurable;
-
-import com.quantitymeasurement.interfaces.IMeasurable;
-import com.quantitymeasurement.interfaces.SupportsArithmetic;
+package com.quantitymeasurement.unit;
 
 /**
  * LengthUnit – Enumeration representing supported length measurement units

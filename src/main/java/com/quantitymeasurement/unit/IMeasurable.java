@@ -1,4 +1,5 @@
-package com.quantitymeasurement.interfaces;
+
+package com.quantitymeasurement.unit;
 
 /**
  * IMeasurable
