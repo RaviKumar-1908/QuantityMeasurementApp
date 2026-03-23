@@ -1,65 +1,30 @@
-package com.quantitymeasurement.entity;
+package com.quantitymeasurement.dto;
 
 import com.quantitymeasurement.model.OperationType;
-import jakarta.persistence.*;
+import com.quantitymeasurement.entity.QuantityMeasurementEntity;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
-@Entity
-@Table(name = "quantity_measurement_entity")
-public class QuantityMeasurementEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class QuantityMeasurementDTO {
     private Long id;
-
-    @Column(nullable = false)
     private Double thisValue;
-
-    @Column(nullable = false)
     private String thisUnit;
-
-    @Column(nullable = false)
     private String thisMeasurementType;
-
     private Double thatValue;
     private String thatUnit;
     private String thatMeasurementType;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private OperationType operation;
-
     private Double resultValue;
     private String resultUnit;
     private String resultMeasurementType;
     private String resultString;
-
-    @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean isError;
-
     private String errorMessage;
-
-    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
-    
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
 
-    public QuantityMeasurementEntity() {
-    }
+    public QuantityMeasurementDTO() {}
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
-
-    // Explicit Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -105,6 +70,29 @@ public class QuantityMeasurementEntity {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public static QuantityMeasurementDTO fromEntity(QuantityMeasurementEntity entity) {
+        if (entity == null) return null;
+        QuantityMeasurementDTO dto = new QuantityMeasurementDTO();
+        dto.setId(entity.getId());
+        dto.setThisValue(entity.getThisValue());
+        dto.setThisUnit(entity.getThisUnit());
+        dto.setThisMeasurementType(entity.getThisMeasurementType());
+        dto.setThatValue(entity.getThatValue());
+        dto.setThatUnit(entity.getThatUnit());
+        dto.setThatMeasurementType(entity.getThatMeasurementType());
+        dto.setOperation(entity.getOperation());
+        dto.setResultValue(entity.getResultValue());
+        dto.setResultUnit(entity.getResultUnit());
+        dto.setResultMeasurementType(entity.getResultMeasurementType());
+        dto.setResultString(entity.getResultString());
+        dto.setError(entity.isError());
+        dto.setErrorMessage(entity.getErrorMessage());
+        dto.setCreatedAt(entity.getCreatedAt());
+        return dto;
+    }
+
+    public static List<QuantityMeasurementDTO> fromEntityList(List<QuantityMeasurementEntity> entities) {
+        if (entities == null) return null;
+        return entities.stream().map(QuantityMeasurementDTO::fromEntity).collect(Collectors.toList());
+    }
 }
