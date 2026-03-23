@@ -1,4 +1,4 @@
-package com.quantitymeasurement.entity;
+package com.quantitymeasurement.model;
 
 import com.quantitymeasurement.unit.IMeasurable;
 

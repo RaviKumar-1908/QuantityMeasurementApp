@@ -1,288 +1,199 @@
 # 📏 QuantityMeasurementApp
 
-> A Java application developed using Test-Driven Development (TDD) to progressively design and refine a quantity measurement system. The project emphasizes incremental development, clean object-oriented design, and progressive architectural refactoring to build a flexible and maintainable domain model over time.
+> A Java Spring Boot application developed using Test-Driven Development (TDD) to progressively design and refine a quantity measurement system. The project emphasizes incremental development, clean object-oriented design, and progressive architectural refactoring to build a flexible and maintainable domain model over time.
 
 ### 📖 Overview
 
 - Modular Java project focused on modelling multi-category quantity measurements (length, weight, and volume) with full arithmetic and conversion support.
-- Organized around incremental Use Cases evolving from simple equality checks to a scalable, capability-aware measurement architecture.
-- Emphasizes clarity, consistency, and maintainable structure as the system grows.
+- Organized around incremental Use Cases evolving from simple equality checks to a highly scalable Spring Boot REST API.
+- Emphasizes clarity, consistency, and maintainable layered architectures as the system scales.
 
 ### ✅ Implemented Features
 
-> _Features will be added here as Use Cases are implemented._
+> _Features developed incrementally from UC1 to UC17._
 
 - 🧩 **UC1 – Feet Equality :**
   - Implements value-based equality for feet measurements using an overridden `equals()` method.
-  - Establishes object equality semantics as the foundation for future unit comparisons.
 
 - 🧩 **UC2 – Inches Equality :**
   - Extends value-based equality comparison to inches measurements using a dedicated `Inches` class.
-  - Maintains independent unit validation while reinforcing equality behaviour across measurement types.
 
 - 🧩 **UC3 – Generic Length :**
   - Refactors unit-specific classes into a unified `Length` abstraction using a `LengthUnit` enum.
-  - Eliminates duplicated logic by applying the DRY principle while enabling cross-unit equality comparison.
 
 - 🧩 **UC4 – Extended Unit Support :**
   - Adds Yards and Centimeters to the `LengthUnit` enum with appropriate conversion factors.
-  - Demonstrates scalability of the generic design by enabling seamless cross-unit equality without introducing new classes.
 
 - 🧩 **UC5 – Unit-to-Unit Conversion :**
   - Introduces explicit conversion operations between supported length units using centralized enum conversion factors.
-  - Extends the `Length` API to convert measurements across units while preserving mathematical equivalence and precision.
 
 - 🧩 **UC6 – Length Addition Operation :**
   - Introduces addition between length measurements with automatic unit normalization and conversion.
-  - Returns a new immutable `Length` result expressed in the unit of the first operand while preserving mathematical accuracy.
 
 - 🧩 **UC7 – Addition with Target Unit Specification :**
   - Extends length addition to allow explicit specification of the result unit independent of operand units.
-  - Enhances API flexibility by enabling arithmetic results to be expressed in any supported unit while preserving immutability and precision.
 
 - 🧩 **UC8 – Standalone Unit Refactor :**
   - Extracts `LengthUnit` into a standalone enum responsible for all unit conversion logic.
-  - Improves architectural separation by delegating conversions to units, reducing coupling and enabling scalable support for future measurement categories.
 
 - 🧩 **UC9 – Weight Measurement Support :**
   - Introduces a weight measurement category with `Weight` and `WeightUnit` supporting kilograms, grams, and pounds.
-  - Enables equality, conversion, and addition operations for weight while preserving strict separation from length measurements and stabilizing the shared measurement architecture.
 
 - 🧩 **UC10 – Generic Quantity Architecture :**
   - Introduces a generic `Quantity<U extends IMeasurable>` model enabling multiple measurement categories through a shared abstraction.
-  - Eliminates category-specific duplication by unifying equality, conversion, and addition logic into a single scalable architecture.
 
 - 🧩 **UC11 – Volume Measurement Support :**
-  - Adds a new measurement category using `VolumeUnit` (Litre, Millilitre, Gallon) implemented through the generic `Quantity<U>` architecture.
-  - Validates that new measurement types integrate without modifying existing quantity logic, proving true multi-category scalability.
+  - Adds a new measurement category using `VolumeUnit` (Litre, Millilitre, Gallon).
 
 - 🧩 **UC12 – Subtraction and Division Operations :**
   - Introduces subtraction between quantities with automatic cross-unit normalization while preserving immutability.
-  - Adds division support producing a dimensionless ratio, enabling comparative analysis across measurements of the same category.
+  - Adds division support producing a dimensionless ratio.
 
 - 🧩 **UC13 – Centralized Arithmetic Logic (DRY Refactor) :**
-  - Refactors addition, subtraction, and division to use a centralized arithmetic helper, eliminating duplicated validation and conversion logic.
-  - Improves maintainability and scalability while preserving all existing behaviour and public APIs.
+  - Refactors addition, subtraction, and division to use a centralized arithmetic helper.
 
 - 🧩 **UC14 – Temperature Measurement (Selective Arithmetic Support) :**
-  - Introduces temperature measurements using `TemperatureUnit` integrated into the generic `Quantity<U>` architecture.
-  - Supports equality comparison and unit conversion across Celsius, Fahrenheit, and Kelvin using non-linear conversion formulas.
-  - Refactors `IMeasurable` with default capability validation to allow category-specific operation support.
-  - Prevents unsupported arithmetic operations (addition, subtraction, division) through explicit validation and meaningful exceptions.
-  - Demonstrates Interface Segregation and capability-based design while preserving backward compatibility for length, weight, and volume.
+  - Introduces temperature measurements using `TemperatureUnit`. Supports equality comparison and unit conversion across Celsius, Fahrenheit, and Kelvin.
 
 - 🧩 **UC15 – N-Tier Architecture Refactoring :**
-  - Refactors the Quantity Measurement Application from a monolithic design into a structured **N-Tier architecture**.
-  - Introduces layered separation including **Controller, Service, Repository, Model, Entity, DTO, Interfaces, and Units** packages.
-  - Moves business logic into the **Service layer**, while the **Controller layer** manages application interaction and orchestration.
-  - Adds a **Repository layer with a cache-based storage implementation** to record measurement operations.
-  - Standardizes data flow using **QuantityDTO for external transfer**, **QuantityModel for internal processing**, and **QuantityMeasurementEntity for persistence**.
-  - Improves **modularity, testability, maintainability, and extensibility**, preparing the system for future integration with **REST APIs or database storage**.
+  - Refactors the Application from a monolithic design into a structured **N-Tier architecture**.
+  - Introduces layered separation including Controller, Service, Repository, Model, Entity, and DTO packages.
 
-- 🧩 **UC16 – Database Integration with JDBC for Quantity Measurement Persistence :**
+- 🧩 **UC16 – Database Integration with JDBC :**
   - Extends the N-Tier architecture established in UC15 with **persistent relational database storage** using **JDBC (Java Database Connectivity)**.
-  - Introduces `QuantityMeasurementDatabaseRepository` as a full JDBC-based replacement for the in-memory `QuantityMeasurementCacheRepository`, enabling long-term data persistence across application restarts.
-  - Adds `ApplicationConfig` utility class that loads all database configuration from `application.properties`, supporting environment-specific settings for **development, testing, and production**.
-  - Introduces `ConnectionPool` utility class that manages a pool of reusable JDBC connections for efficient resource usage, eliminating the overhead of opening and closing connections on every operation.
-  - Extends `IQuantityMeasurementRepository` interface with four new methods: `getMeasurementsByOperation()`, `getMeasurementsByType()`, `getTotalCount()`, and `deleteAll()` — enabling filtering, reporting, and test isolation.
-  - Adds `DatabaseException` to the custom exception hierarchy, with static factory methods (`connectionFailed`, `queryFailed`, `transactionFailed`) for structured, meaningful database error handling.
-  - Adopts **parameterized SQL queries** (`PreparedStatement`) throughout the database repository to prevent SQL injection attacks.
-  - Migrates all `System.out.println` logging to **Java's built-in `java.util.logging` (JUL)** framework via SLF4J and Logback for structured, configurable output across all layers.
-  - Reorganizes packages from `com.apps.quantitymeasurement.*` to `com.app.quantitymeasurement.*` with clear layer-based sub-packages: `controller`, `service`, `repository`, `entity`, `exception`, `unit`, and `util`.
-  - Uses **H2 embedded database** by default (zero external setup required) with the ability to switch to MySQL or PostgreSQL by updating `application.properties` and uncommenting the relevant `pom.xml` dependency.
-  - Adds `schema.sql` under `src/main/resources/db/` defining the `quantity_measurement_entity` table and an audit `quantity_measurement_history` table with proper indexes for query performance.
-  - Repository type is fully **configurable at runtime** via the `repository.type` property (`database` or `cache`) — no code changes needed to switch persistence strategies.
-  - Adds integration tests (`QuantityMeasurementIntegrationTest`) and unit tests for each layer — repository, service, and controller — using H2 in-memory database for fast, isolated test execution.
-  - Implements `closeResources()` and `deleteAllMeasurements()` methods on `QuantityMeasurementApp` for graceful shutdown and test state management.
-  - Demonstrates enterprise-level practices including **connection pooling, transaction awareness, resource cleanup with try-finally, separation of configuration from code**, and **environment-specific database profiles**.
+
+- 🧩 **UC17 – Spring Boot REST API & Spring Data JPA Integration :**
+  - Completely migrated the legacy standard Java POJO application into a fully managed **Spring Boot 3** web application.
+  - Replaced manual JDBC configuration and connection pooling with **Spring Data JPA** and Hibernate for seamless, robust, and automatic object-relational mapping.
+  - Upgraded the manual Controller layer into a modern RESTful **@RestController** serving JSON responses over HTTP at `/api/quantities`.
+  - Introduced completely documented API endpoints for `/compare`, `/convert`, `/add`, `/subtract`, `/divide`, and `/history` utilizing strict `QuantityInputDTO` payloads.
+  - Integrated **OpenAPI 3 / Swagger UI** for interactive exploration and execution of all application endpoints directly from the browser (`/swagger-ui.html`).
+  - Restructured packages by safely isolating Data Transfer Objects and database models into a centralized `model` package (`QuantityDTO`, `QuantityInputDTO`, `QuantityMeasurementDTO`, `QuantityMeasurementEntity`).
+  - Optimized the Java 17 record-like Boilerplate code utilizing **Lombok** `@Data`, `@Builder`, and generated constructor injections.
 
 ### 🧰 Tech Stack
 
-- **Java 17+** — core language and application development
-- **Maven** — build automation and dependency management
-- **JUnit 5.10.0 (Jupiter)** — unit and integration testing framework used across all test layers
-- **Mockito 4.8.1** — mocking framework for isolated layer testing
-- **H2 2.2.224** — embedded in-memory/file database for development and testing
-- **SLF4J + Logback** — structured logging facade and implementation
-- **HikariCP 5.1.0** — connection pool library (included as dependency reference)
-- **JDBC** — Java Database Connectivity API for relational database access
+- **Java 17+** 
+- **Spring Boot 3.2.x** — Core framework for REST API and Dependency Injection
+- **Spring Data JPA (Hibernate)** — Object-relational mapping for simplified database interactions
+- **OpenAPI 3.0 / Swagger** — Interactive API documentation and testing UI
+- **Maven** — Build automation and dependency management
+- **H2 / MySQL** — Embedded in-memory database for rapid development (Configured in application.properties)
+- **Lombok** — Boilerplate reduction (Auto-gen getters, setters, builders)
+- **JUnit 5 & Spring Boot Test** — Integration and Application Context verification
 
 ### ▶️ Build / Run
 
-- Clean and compile:
-
-  ```
+- Clean and compile the application:
+  ```bash
   mvn clean compile
   ```
 
-- Run the application:
-
+- Start the Spring Boot Web Server (Locally):
+  ```bash
+  mvn spring-boot:run
   ```
-  mvn exec:java
-  ```
 
-- Run all tests:
+- **Access the Application System:**
+  Once the server boots up, navigate to the following URL in your web browser to test and execute commands visually:
+  **`http://localhost:8080/swagger-ui.html`** 
+  *(Default generated Spring Security Username: `user` | Password: See your console logs)*
 
-  ```
+- Run all Application Tests:
+  ```bash
   mvn clean test
-  ```
-
-- Run only integration tests:
-
-  ```
-  mvn test -Dtest=QuantityMeasurementIntegrationTest
-  ```
-
-- Run only database repository tests:
-
-  ```
-  mvn test -Dtest=QuantityMeasurementDatabaseRepositoryTest
-  ```
-
-- Build a fat JAR (includes all dependencies):
-
-  ```
-  mvn clean package
-  ```
-
-- Run the fat JAR directly:
-
-  ```
-  java -jar target/quantity-measurement-app-fat.jar
   ```
 
 ### ⚙️ Configuration
 
-The application is configured via `src/main/resources/application.properties`:
+The application is securely configured via `src/main/resources/application.properties`:
 
 ```properties
-# Switch between "database" (H2/MySQL) and "cache" (in-memory)
-repository.type=database
+# Web Server Configuration
+server.port=8080
 
-# Environment: development | testing | production
-app.env=development
+# H2 In-Memory Database (Development)
+spring.datasource.url=jdbc:h2:mem:quantitymeasurementdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+spring.datasource.driver-class-name=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
 
-# H2 embedded database (default — no external setup needed)
-db.url=jdbc:h2:./quantitymeasurementdb;AUTO_SERVER=TRUE
-db.username=sa
-db.password=
-db.driver=org.h2.Driver
-db.pool-size=5
+# Hibernate Configuration
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.jpa.properties.hibernate.format_sql=true
+
+# H2 Console Web UI
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
 ```
-
-To switch to **MySQL** in future use cases, uncomment the MySQL block in `application.properties` and the `mysql-connector-java` dependency in `pom.xml`.
 
 ### 📂 Project Structure
 
-```
+```text
   📦 QuantityMeasurementApp
   │
   ├── 📁 src
   │   ├── 📁 main
   │   │   ├── 📁 java
   │   │   │   └── 📁 com
-  │   │   │       └── 📁 app
-  │   │   │           └── 📁 quantitymeasurement
-  │   │   │               ├── 📁 controller
-  │   │   │               │   └── 📄 QuantityMeasurementController.java
-  │   │   │               │
-  │   │   │               ├── 📁 entity
-  │   │   │               │   ├── 📄 Quantity.java
-  │   │   │               │   ├── 📄 QuantityDTO.java
-  │   │   │               │   ├── 📄 QuantityModel.java
-  │   │   │               │   └── 📄 QuantityMeasurementEntity.java
-  │   │   │               │
-  │   │   │               ├── 📁 exception
-  │   │   │               │   ├── 📄 QuantityMeasurementException.java
-  │   │   │               │   └── 📄 DatabaseException.java          ← NEW (UC16)
-  │   │   │               │
-  │   │   │               ├── 📁 repository
-  │   │   │               │   ├── 📄 IQuantityMeasurementRepository.java
-  │   │   │               │   ├── 📄 QuantityMeasurementCacheRepository.java
-  │   │   │               │   └── 📄 QuantityMeasurementDatabaseRepository.java  ← NEW (UC16)
-  │   │   │               │
-  │   │   │               ├── 📁 service
-  │   │   │               │   ├── 📄 IQuantityMeasurementService.java
-  │   │   │               │   └── 📄 QuantityMeasurementServiceImpl.java
-  │   │   │               │
-  │   │   │               ├── 📁 unit
-  │   │   │               │   ├── 📄 IMeasurable.java
-  │   │   │               │   ├── 📄 SupportsArithmetic.java
-  │   │   │               │   ├── 📄 LengthUnit.java
-  │   │   │               │   ├── 📄 WeightUnit.java
-  │   │   │               │   ├── 📄 VolumeUnit.java
-  │   │   │               │   └── 📄 TemperatureUnit.java
-  │   │   │               │
-  │   │   │               ├── 📁 util                                ← NEW (UC16)
-  │   │   │               │   ├── 📄 ApplicationConfig.java          ← NEW (UC16)
-  │   │   │               │   └── 📄 ConnectionPool.java             ← NEW (UC16)
-  │   │   │               │
-  │   │   │               └── 📄 QuantityMeasurementApp.java
+  │   │   │       └── 📁 quantitymeasurement
+  │   │   │           ├── 📁 controller
+  │   │   │           │   └── 📄 QuantityMeasurementController.java
+  │   │   │           │
+  │   │   │           ├── 📁 exception
+  │   │   │           │   └── 📄 QuantityMeasurementException.java
+  │   │   │           │
+  │   │   │           ├── 📁 model                                       ← NEW (UC17)
+  │   │   │           │   ├── 📄 OperationType.java
+  │   │   │           │   ├── 📄 QuantityDTO.java
+  │   │   │           │   ├── 📄 QuantityInputDTO.java
+  │   │   │           │   ├── 📄 QuantityMeasurementDTO.java
+  │   │   │           │   ├── 📄 QuantityMeasurementEntity.java
+  │   │   │           │   └── 📄 QuantityModel.java
+  │   │   │           │
+  │   │   │           ├── 📁 repository                                  ← UPDATED (UC17)
+  │   │   │           │   └── 📄 QuantityMeasurementRepository.java      (Spring Data JPA)
+  │   │   │           │
+  │   │   │           ├── 📁 service
+  │   │   │           │   ├── 📄 IQuantityMeasurementService.java
+  │   │   │           │   └── 📄 QuantityMeasurementServiceImpl.java
+  │   │   │           │
+  │   │   │           ├── 📁 unit
+  │   │   │           │   ├── 📄 IMeasurable.java
+  │   │   │           │   ├── 📄 SupportsArithmetic.java
+  │   │   │           │   ├── 📄 LengthUnit.java
+  │   │   │           │   ├── 📄 WeightUnit.java
+  │   │   │           │   ├── 📄 VolumeUnit.java
+  │   │   │           │   └── 📄 TemperatureUnit.java
+  │   │   │           │
+  │   │   │           └── 📄 QuantityMeasurementApplication.java         ← NEW (UC17)
   │   │   │
   │   │   └── 📁 resources
-  │   │       ├── 📄 application.properties                          ← NEW (UC16)
+  │   │       ├── 📄 application.properties                            
   │   │       └── 📁 db
-  │   │           └── 📄 schema.sql                                  ← NEW (UC16)
+  │   │           └── 📄 schema.sql                                    
   │   │
   │   └── 📁 test
   │       ├── 📁 java
   │       │   └── 📁 com
-  │       │       └── 📁 app
-  │       │           └── 📁 quantitymeasurement
-  │       │               ├── 📁 controller
-  │       │               │   └── 📄 QuantityMeasurementControllerTest.java
-  │       │               │
-  │       │               ├── 📁 entity
-  │       │               │   ├── 📄 QuantityDTOTest.java
-  │       │               │   └── 📄 QuantityMeasurementEntityTest.java
-  │       │               │
-  │       │               ├── 📁 exception
-  │       │               │   └── 📄 QuantityMeasurementExceptionTest.java
-  │       │               │
-  │       │               ├── 📁 integrationTests                    ← NEW (UC16)
-  │       │               │   └── 📄 QuantityMeasurementIntegrationTest.java
-  │       │               │
-  │       │               ├── 📁 model
-  │       │               │   ├── 📄 QuantityArithmeticTest.java
-  │       │               │   ├── 📄 QuantityConversionTest.java
-  │       │               │   ├── 📄 QuantityEqualityTest.java
-  │       │               │   └── 📄 QuantityModelTest.java
-  │       │               │
-  │       │               ├── 📁 repository
-  │       │               │   ├── 📄 QuantityMeasurementCacheRepositoryTest.java
-  │       │               │   └── 📄 QuantityMeasurementDatabaseRepositoryTest.java  ← NEW (UC16)
-  │       │               │
-  │       │               ├── 📁 service
-  │       │               │   └── 📄 QuantityMeasurementServiceTest.java
-  │       │               │
-  │       │               └── 📁 unit
-  │       │                   ├── 📄 IMeasurableTest.java
-  │       │                   ├── 📄 LengthUnitTest.java
-  │       │                   ├── 📄 WeightUnitTest.java
-  │       │                   ├── 📄 VolumeUnitTest.java
-  │       │                   └── 📄 TemperatureUnitTest.java
+  │       │       └── 📁 quantitymeasurement
+  │       │           ├── 📄 QuantityMeasurementApplicationTests.java    ← NEW (UC17)
+  │       │           ├── 📁 exception
+  │       │           │   └── 📄 QuantityMeasurementExceptionTest.java
+  │       │           └── 📁 unit
+  │       │               ├── 📄 IMeasurableTest.java
+  │       │               ├── 📄 LengthUnitTest.java
+  │       │               ├── 📄 WeightUnitTest.java
+  │       │               └── 📄 VolumeUnitTest.java
   │       │
   │       └── 📁 resources
-  │           └── 📄 application.properties                          ← NEW (UC16)
+  │           └── 📄 application.properties                          
   │
   ├── ⚙️ pom.xml
   ├── 🚫 .gitignore
   └── 📘 README.md
 ```
 
-### ⚙️ Development Approach
-
-> This project follows an incremental **Test-Driven Development (TDD)** workflow:
-
-- Tests are written first to define expected behaviour.
-- Implementation code is developed to satisfy the tests.
-- Each Use Case introduces new functionality in small, controlled steps.
-- Existing behaviour is preserved through continuous refactoring.
-- Design evolves toward clean, maintainable, and well-tested software.
-- Later use cases introduce capability-based behavior where different measurement categories support different operations safely.
-
-
-
 <div align="center">
-✨ Incrementally developed using Test-Driven Development and continuous refactoring.
+✨ Incrementally developed using Test-Driven Development and architecture modernization.
 </div>

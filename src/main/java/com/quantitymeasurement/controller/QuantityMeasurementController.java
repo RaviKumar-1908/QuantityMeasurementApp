@@ -1,283 +1,129 @@
 package com.quantitymeasurement.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 import java.util.logging.Logger;
 
-import com.quantitymeasurement.entity.QuantityDTO;
+import com.quantitymeasurement.model.QuantityDTO;
+import com.quantitymeasurement.model.QuantityInputDTO;
+import com.quantitymeasurement.model.QuantityMeasurementDTO;
 import com.quantitymeasurement.service.IQuantityMeasurementService;
+import com.quantitymeasurement.repository.QuantityMeasurementRepository;
 
 /**
  * QuantityMeasurementController
  *
- * Acts as the entry point between user interaction and the service layer.
- * Belongs to the Controller Layer in the N-Tier architecture.
- *
- * The controller is responsible for receiving input requests from the Application Layer,
- * performing minimal validation, and delegating all business logic to the Service Layer.
- * It must contain NO business logic of its own.
- *
- * Operations supported by this controller:
- * - Quantity comparison
- * - Unit conversion
- * - Addition (with and without target unit)
- * - Subtraction (with and without target unit)
- * - Division
- *
- * Each operation has both a raw "perform" method (returns result directly) and a
- * "demonstrate" method (prints formatted output to the console for demo purposes).
- *
+ * REST Controller exposing quantity measurement operations as API endpoints.
  */
+@RestController
+@RequestMapping("/api/quantities")
+@Tag(name = "Quantity Measurement API", description = "Endpoints for comparing, converting, and performing arithmetic on physical quantities.")
 public class QuantityMeasurementController {
 
-    /**
-     * Logger for recording controller-level events.
-     * Uses SLF4J-compatible java.util.logging as configured by Logback in pom.xml.
-     */
-    private static final Logger logger = Logger.getLogger(
-        QuantityMeasurementController.class.getName()
-    );
+    private static final Logger logger = Logger.getLogger(QuantityMeasurementController.class.getName());
 
-    /**
-     * Reference to the service layer — all business logic is delegated here.
-     * Injected via constructor to maintain loose coupling.
-     */
-    private IQuantityMeasurementService quantityMeasurementService;
+    private final IQuantityMeasurementService service;
+    private final QuantityMeasurementRepository repository;
 
-    /**
-     * Constructs the controller with the given service layer dependency.
-     *
-     * @param quantityMeasurementService service layer instance
-     */
-    public QuantityMeasurementController(IQuantityMeasurementService quantityMeasurementService) {
-        this.quantityMeasurementService = quantityMeasurementService;
-        logger.info("QuantityMeasurementController initialized.");
+    @Autowired
+    public QuantityMeasurementController(IQuantityMeasurementService service, QuantityMeasurementRepository repository) {
+        this.service = service;
+        this.repository = repository;
+        logger.info("QuantityMeasurementController initialized as REST Controller.");
     }
 
     /**
-     * Delegates a comparison request to the service layer.
+     * POST endpoint to compare two quantities.
      *
-     * @param thisQuantityDTO first quantity
-     * @param thatQuantityDTO second quantity
-     * @return true if both quantities are equal
+     * @param input Data Transfer Object containing both quantities
+     * @return boolean wrapped in ResponseEntity indicating equality
      */
-    public boolean performComparison(QuantityDTO thisQuantityDTO, QuantityDTO thatQuantityDTO) {
-        return quantityMeasurementService.compare(thisQuantityDTO, thatQuantityDTO);
+    @PostMapping("/compare")
+    @Operation(summary = "Compare two quantities", description = "Returns true if the two quantities are physically equal.")
+    public ResponseEntity<Boolean> compare(@Valid @RequestBody QuantityInputDTO input) {
+        boolean result = service.compare(input.getThisQuantity(), input.getThatQuantity());
+        return ResponseEntity.ok(result);
     }
 
     /**
-     * Delegates a unit conversion request to the service layer.
+     * POST endpoint to convert a quantity into a target unit.
      *
-     * @param thisQuantityDTO source quantity
-     * @param thatQuantityDTO target unit DTO
-     * @return converted quantity DTO
+     * @param input Data Transfer Object containing the source and target items
+     * @return Converted quantity wrapped in ResponseEntity
      */
-    public QuantityDTO performConversion(QuantityDTO thisQuantityDTO, QuantityDTO thatQuantityDTO) {
-        return quantityMeasurementService.convert(thisQuantityDTO, thatQuantityDTO);
+    @PostMapping("/convert")
+    @Operation(summary = "Convert a quantity", description = "Converts the first quantity into the unit of the target quantity.")
+    public ResponseEntity<QuantityDTO> convert(@Valid @RequestBody QuantityInputDTO input) {
+        // targetUnit or thatQuantity can act as the target
+        QuantityDTO target = input.getTargetUnit() != null ? input.getTargetUnit() : input.getThatQuantity();
+        QuantityDTO result = service.convert(input.getThisQuantity(), target);
+        return ResponseEntity.ok(result);
     }
 
     /**
-     * Delegates an addition request to the service layer.
-     * Result is returned in the same unit as the first operand.
+     * POST endpoint to add two quantities together.
      *
-     * @param thisQuantityDTO first quantity
-     * @param thatQuantityDTO second quantity
-     * @return addition result
+     * @param input Data Transfer Object containing the operands
+     * @return Summed quantity wrapped in ResponseEntity
      */
-    public QuantityDTO performAddition(QuantityDTO thisQuantityDTO, QuantityDTO thatQuantityDTO) {
-        return quantityMeasurementService.add(thisQuantityDTO, thatQuantityDTO);
-    }
-
-    /**
-     * Delegates an addition request with a target unit to the service layer.
-     *
-     * @param thisQuantityDTO first quantity
-     * @param thatQuantityDTO second quantity
-     * @param targetUnitDTO   target unit for result
-     * @return addition result in target unit
-     */
-    public QuantityDTO performAddition(
-            QuantityDTO thisQuantityDTO,
-            QuantityDTO thatQuantityDTO,
-            QuantityDTO targetUnitDTO) {
-        return quantityMeasurementService.add(thisQuantityDTO, thatQuantityDTO, targetUnitDTO);
-    }
-
-    /**
-     * Delegates a subtraction request to the service layer.
-     * Result is returned in the same unit as the first operand.
-     *
-     * @param thisQuantityDTO first quantity
-     * @param thatQuantityDTO second quantity
-     * @return subtraction result
-     */
-    public QuantityDTO performSubtraction(
-            QuantityDTO thisQuantityDTO, QuantityDTO thatQuantityDTO) {
-        return quantityMeasurementService.subtract(thisQuantityDTO, thatQuantityDTO);
-    }
-
-    /**
-     * Delegates a subtraction request with a target unit to the service layer.
-     *
-     * @param thisQuantityDTO first quantity
-     * @param thatQuantityDTO second quantity
-     * @param targetUnitDTO   target unit for result
-     * @return subtraction result in target unit
-     */
-    public QuantityDTO performSubtraction(
-            QuantityDTO thisQuantityDTO,
-            QuantityDTO thatQuantityDTO,
-            QuantityDTO targetUnitDTO) {
-        return quantityMeasurementService.subtract(thisQuantityDTO, thatQuantityDTO, targetUnitDTO);
-    }
-
-    /**
-     * Delegates a division request to the service layer.
-     *
-     * @param thisQuantityDTO dividend quantity
-     * @param thatQuantityDTO divisor quantity
-     * @return numeric division result
-     */
-    public double performDivision(QuantityDTO thisQuantityDTO, QuantityDTO thatQuantityDTO) {
-        return quantityMeasurementService.divide(thisQuantityDTO, thatQuantityDTO);
-    }
-
-    /* --------------------------------------------------------------------- 
-     * Demonstrate methods — formatted console output for demo/testing
-     * -------------------------------------------------------------------- */
-
-    /**
-     * Demonstrates a comparison operation with formatted console output.
-     *
-     * @param thisQuantityDTO first quantity
-     * @param thatQuantityDTO second quantity
-     */
-    public void demonstrateComparison(QuantityDTO thisQuantityDTO, QuantityDTO thatQuantityDTO) {
-        System.out.println("--- Equality Demonstration ---");
-        System.out.println("Operation: COMPARISON");
-        System.out.println("This Quantity: " + thisQuantityDTO.getValue() + " " + thisQuantityDTO.getUnit());
-        System.out.println("That Quantity: " + thatQuantityDTO.getValue() + " " + thatQuantityDTO.getUnit());
-        try {
-            boolean result = performComparison(thisQuantityDTO, thatQuantityDTO);
-            System.out.println("Comparison Result: " + result);
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+    @PostMapping("/add")
+    @Operation(summary = "Add two quantities", description = "Adds two quantities and optionally returns the result in a target unit.")
+    public ResponseEntity<QuantityDTO> add(@Valid @RequestBody QuantityInputDTO input) {
+        QuantityDTO result;
+        if (input.getTargetUnit() != null) {
+            result = service.add(input.getThisQuantity(), input.getThatQuantity(), input.getTargetUnit());
+        } else {
+            result = service.add(input.getThisQuantity(), input.getThatQuantity());
         }
+        return ResponseEntity.ok(result);
     }
 
     /**
-     * Demonstrates a conversion operation with formatted console output.
+     * POST endpoint to subtract one quantity from another.
      *
-     * @param thisQuantityDTO     source quantity
-     * @param targetQuantityDTO   target unit DTO
+     * @param input Data Transfer Object containing the operands
+     * @return Subtracted quantity wrapped in ResponseEntity
      */
-    public void demonstrateConversion(QuantityDTO thisQuantityDTO, QuantityDTO targetQuantityDTO) {
-        System.out.println("--- Conversion Demonstration ---");
-        System.out.println("Operation: CONVERT");
-        System.out.println("This Quantity: " + thisQuantityDTO.getValue() + " " + thisQuantityDTO.getUnit());
-        System.out.println("Target Unit:   " + targetQuantityDTO.getUnit());
-        try {
-            QuantityDTO result = performConversion(thisQuantityDTO, targetQuantityDTO);
-            System.out.println("Conversion Result: " + result.getValue() + " " + result.getUnit());
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+    @PostMapping("/subtract")
+    @Operation(summary = "Subtract two quantities", description = "Subtracts the second quantity from the first.")
+    public ResponseEntity<QuantityDTO> subtract(@Valid @RequestBody QuantityInputDTO input) {
+        QuantityDTO result;
+        if (input.getTargetUnit() != null) {
+            result = service.subtract(input.getThisQuantity(), input.getThatQuantity(), input.getTargetUnit());
+        } else {
+            result = service.subtract(input.getThisQuantity(), input.getThatQuantity());
         }
+        return ResponseEntity.ok(result);
     }
 
     /**
-     * Demonstrates an addition operation with formatted console output.
+     * POST endpoint to divide one quantity by another.
      *
-     * @param thisQuantityDTO first quantity
-     * @param thatQuantityDTO second quantity
+     * @param input Data Transfer Object containing the operands
+     * @return Division ratio wrapped in ResponseEntity
      */
-    public void demonstrateAddition(QuantityDTO thisQuantityDTO, QuantityDTO thatQuantityDTO) {
-        System.out.println("--- Addition Demonstration ---");
-        System.out.println("Operation: ADD");
-        System.out.println("This Quantity: " + thisQuantityDTO.getValue() + " " + thisQuantityDTO.getUnit());
-        System.out.println("That Quantity: " + thatQuantityDTO.getValue() + " " + thatQuantityDTO.getUnit());
-        try {
-            QuantityDTO result = performAddition(thisQuantityDTO, thatQuantityDTO);
-            System.out.println("Addition Result: " + result.getValue() + " " + result.getUnit());
-        } catch (UnsupportedOperationException e) {
-            System.out.println("Error: " + thisQuantityDTO.getUnit() + " does not support ADD operations.");
-        } catch (IllegalArgumentException e) {
-            System.out.println("Error: Cannot perform arithmetic between different measurement categories: "
-                + thisQuantityDTO.getMeasurementType() + " and " + thatQuantityDTO.getMeasurementType());
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
+    @PostMapping("/divide")
+    @Operation(summary = "Divide two quantities", description = "Divides the first quantity by the second and returns the numerical ratio.")
+    public ResponseEntity<Double> divide(@Valid @RequestBody QuantityInputDTO input) {
+        double result = service.divide(input.getThisQuantity(), input.getThatQuantity());
+        return ResponseEntity.ok(result);
     }
 
     /**
-     * Demonstrates an addition operation with an explicit target unit.
+     * GET endpoint to fetch the full database operation history.
      *
-     * @param thisQuantityDTO first quantity
-     * @param thatQuantityDTO second quantity
-     * @param targetUnitDTO   target unit for result
+     * @return List of past operations wrapped in ResponseEntity
      */
-    public void demonstrateAddition(
-            QuantityDTO thisQuantityDTO,
-            QuantityDTO thatQuantityDTO,
-            QuantityDTO targetUnitDTO) {
-        System.out.println("--- Addition Demonstration (with Target Unit) ---");
-        System.out.println("Operation: ADD");
-        System.out.println("This Quantity: " + thisQuantityDTO.getValue() + " " + thisQuantityDTO.getUnit());
-        System.out.println("That Quantity: " + thatQuantityDTO.getValue() + " " + thatQuantityDTO.getUnit());
-        System.out.println("Target Unit:   " + targetUnitDTO.getUnit());
-        try {
-            QuantityDTO result = performAddition(thisQuantityDTO, thatQuantityDTO, targetUnitDTO);
-            System.out.println("Addition Result: " + result.getValue() + " " + result.getUnit());
-        } catch (UnsupportedOperationException e) {
-            System.out.println("Error: " + thisQuantityDTO.getUnit() + " does not support ADD operations.");
-        } catch (IllegalArgumentException e) {
-            System.out.println("Error: Cannot perform arithmetic between different measurement categories: "
-                + thisQuantityDTO.getMeasurementType() + " and " + thatQuantityDTO.getMeasurementType());
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Demonstrates a subtraction operation with formatted console output.
-     *
-     * @param thisQuantityDTO first quantity
-     * @param thatQuantityDTO second quantity
-     */
-    public void demonstrateSubtraction(QuantityDTO thisQuantityDTO, QuantityDTO thatQuantityDTO) {
-        System.out.println("--- Subtraction Demonstration ---");
-        System.out.println("Operation: SUBTRACT");
-        System.out.println("This Quantity: " + thisQuantityDTO.getValue() + " " + thisQuantityDTO.getUnit());
-        System.out.println("That Quantity: " + thatQuantityDTO.getValue() + " " + thatQuantityDTO.getUnit());
-        try {
-            QuantityDTO result = performSubtraction(thisQuantityDTO, thatQuantityDTO);
-            System.out.println("Subtraction Result: " + result.getValue() + " " + result.getUnit());
-        } catch (UnsupportedOperationException e) {
-            System.out.println("Error: " + thisQuantityDTO.getUnit() + " does not support SUBTRACT operations.");
-        } catch (IllegalArgumentException e) {
-            System.out.println("Error: Cannot perform arithmetic between different measurement categories.");
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Demonstrates a division operation with formatted console output.
-     *
-     * @param thisQuantityDTO first quantity
-     * @param thatQuantityDTO second quantity
-     */
-    public void demonstrateDivision(QuantityDTO thisQuantityDTO, QuantityDTO thatQuantityDTO) {
-        System.out.println("--- Division Demonstration ---");
-        System.out.println("Operation: DIVIDE");
-        System.out.println("This Quantity: " + thisQuantityDTO.getValue() + " " + thisQuantityDTO.getUnit());
-        System.out.println("That Quantity: " + thatQuantityDTO.getValue() + " " + thatQuantityDTO.getUnit());
-        try {
-            double result = performDivision(thisQuantityDTO, thatQuantityDTO);
-            System.out.println("Division Result: " + result);
-        } catch (ArithmeticException e) {
-            System.out.println("Error: " + e.getMessage());
-        } catch (UnsupportedOperationException e) {
-            System.out.println("Error: " + thisQuantityDTO.getUnit() + " does not support DIVIDE operations.");
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
+    @GetMapping("/history")
+    @Operation(summary = "Get measurement history", description = "Retrieves all past operations stored in the database.")
+    public ResponseEntity<List<QuantityMeasurementDTO>> getHistory() {
+        List<QuantityMeasurementDTO> history = QuantityMeasurementDTO.fromEntityList(repository.findAll());
+        return ResponseEntity.ok(history);
     }
 }
