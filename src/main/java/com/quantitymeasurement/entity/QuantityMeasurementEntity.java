@@ -1,6 +1,7 @@
 package com.quantitymeasurement.entity;
 
 import com.quantitymeasurement.model.OperationType;
+import com.quantitymeasurement.model.UserEntity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -44,6 +45,10 @@ public class QuantityMeasurementEntity {
     
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = true)
+    private UserEntity user;
 
     public QuantityMeasurementEntity() {
     }
@@ -107,4 +112,7 @@ public class QuantityMeasurementEntity {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public UserEntity getUser() { return user; }
+    public void setUser(UserEntity user) { this.user = user; }
 }

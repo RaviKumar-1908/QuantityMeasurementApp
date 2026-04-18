@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  mysqldb:
+    image: mysql:8
+    container_name: quantity-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: quantity_measurement
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  backend:
+    build: .
+    container_name: quantity-backend
+    restart: on-failure
+    depends_on:
+      mysqldb:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      # Injecting environment variables dynamically for production profile
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_URL=jdbc:mysql://mysqldb:3306/quantity_measurement?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - DB_USER=root
+      - DB_PASS=root
+      - JWT_SECRET=my-very-secure-secret-for-jwt-token-signing
+      # If you use Google OAuth in production, set these on the EC2 instance later
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-placeholder-id}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-placeholder-secret}
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql-data:

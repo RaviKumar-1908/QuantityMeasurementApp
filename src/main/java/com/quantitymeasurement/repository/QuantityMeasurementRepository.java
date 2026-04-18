@@ -3,8 +3,10 @@ package com.quantitymeasurement.repository;
 import com.quantitymeasurement.entity.QuantityMeasurementEntity;
 import com.quantitymeasurement.model.OperationType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,6 +24,15 @@ public interface QuantityMeasurementRepository extends JpaRepository<QuantityMea
     long countByOperationAndIsErrorFalse(OperationType operation);
     
     List<QuantityMeasurementEntity> findByIsErrorTrue();
+
+    // User Specific Queries
+    List<QuantityMeasurementEntity> findByUserId(Long userId);
+    long countByUserId(Long userId);
+    long countByUserIdAndOperation(Long userId, OperationType operation);
+    
+    @Modifying
+    @Transactional
+    void deleteByUserId(Long userId);
     
     // We can also use @Query completely customized queries
     @Query("SELECT q FROM QuantityMeasurementEntity q WHERE q.operation = :operation AND q.isError = false")

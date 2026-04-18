@@ -10,6 +10,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import com.quantitymeasurement.repository.QuantityMeasurementRepository;
+import java.util.Map;
+import java.util.HashMap;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -25,6 +28,9 @@ public class QuantityMeasurementControllerTest {
 
     @MockBean
     private IQuantityMeasurementService service;
+
+    @MockBean
+    private QuantityMeasurementRepository repository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -59,5 +65,16 @@ public class QuantityMeasurementControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.value").value(14.0))
                 .andExpect(jsonPath("$.unit").value("INCHES"));
+    }
+
+    @Test
+    public void testHistoryStatsEndpoint() throws Exception {
+        Map<String, Object> mockStats = new HashMap<>();
+        mockStats.put("total", 5L);
+        when(service.getHistoryStats()).thenReturn(mockStats);
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/quantities/history/stats"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(5));
     }
 }

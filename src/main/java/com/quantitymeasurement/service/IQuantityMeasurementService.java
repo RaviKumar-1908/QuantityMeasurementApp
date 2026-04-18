@@ -1,6 +1,9 @@
 package com.quantitymeasurement.service;
 
 import com.quantitymeasurement.dto.QuantityDTO;
+import com.quantitymeasurement.dto.QuantityMeasurementDTO;
+import java.util.List;
+import java.util.Map;
 
 /**
  * IQuantityMeasurementService
@@ -105,4 +108,21 @@ public interface IQuantityMeasurementService {
      * @return division result
      */
     double divide(QuantityDTO thisQuantityDTO, QuantityDTO thatQuantityDTO);
+
+    /**
+     * Retrieves the history of operations for the currently authenticated user.
+     * @return List of past operations.
+     */
+    List<QuantityMeasurementDTO> getHistory();
+
+    /**
+     * Retrieves statistics (counts) of operations for the currently authenticated user.
+     * @return Map containing statistics.
+     */
+    Map<String, Object> getHistoryStats();
+
+    /**
+     * Securely deletes completely the corresponding history stored under the authenticated session.
+     */
+    void deleteHistory();
 }

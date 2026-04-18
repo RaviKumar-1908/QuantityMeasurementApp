@@ -38,5 +38,6 @@ data/*.ser
 *.log
 
 # --- Environment / Secrets ---
+application-dev.properties
 application-prod.properties
 *.env

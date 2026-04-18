@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import com.quantitymeasurement.dto.QuantityDTO;
@@ -23,18 +24,20 @@ import com.quantitymeasurement.repository.QuantityMeasurementRepository;
  */
 @RestController
 @RequestMapping("/api/quantities")
+@CrossOrigin(origins = "http://localhost:5174")
+
 @Tag(name = "Quantity Measurement API", description = "Endpoints for comparing, converting, and performing arithmetic on physical quantities.")
 public class QuantityMeasurementController {
 
     private static final Logger logger = Logger.getLogger(QuantityMeasurementController.class.getName());
 
     private final IQuantityMeasurementService service;
-    private final QuantityMeasurementRepository repository;
+//    private final QuantityMeasurementRepository repository;
 
     @Autowired
-    public QuantityMeasurementController(IQuantityMeasurementService service, QuantityMeasurementRepository repository) {
+    public QuantityMeasurementController(IQuantityMeasurementService service) {
         this.service = service;
-        this.repository = repository;
+//        this.repository = repository;
         logger.info("QuantityMeasurementController initialized as REST Controller.");
     }
 
@@ -121,9 +124,31 @@ public class QuantityMeasurementController {
      * @return List of past operations wrapped in ResponseEntity
      */
     @GetMapping("/history")
-    @Operation(summary = "Get measurement history", description = "Retrieves all past operations stored in the database.")
+    @Operation(summary = "Get measurement history", description = "Retrieves all past operations stored in the database for the authenticated user.")
     public ResponseEntity<List<QuantityMeasurementDTO>> getHistory() {
-        List<QuantityMeasurementDTO> history = QuantityMeasurementDTO.fromEntityList(repository.findAll());
-        return ResponseEntity.ok(history);
+        return ResponseEntity.ok(service.getHistory());
+    }
+
+    /**
+     * GET endpoint to fetch the operation statistics.
+     *
+     * @return Map of statistics wrapped in ResponseEntity
+     */
+    @GetMapping("/history/stats")
+    @Operation(summary = "Get measurement statistics", description = "Retrieves operation counts for the authenticated user.")
+    public ResponseEntity<Map<String, Object>> getHistoryStats() {
+        return ResponseEntity.ok(service.getHistoryStats());
+    }
+
+    /**
+     * DELETE endpoint to effectively erase operation memory.
+     *
+     * @return Success string wrapped in ResponseEntity
+     */
+    @DeleteMapping("/history")
+    @Operation(summary = "Clear measurement history", description = "Deletes all past operations stored exclusively for the authenticated user.")
+    public ResponseEntity<String> deleteHistory() {
+        service.deleteHistory();
+        return ResponseEntity.ok("History memory cleanly wiped successfully");
     }
 }

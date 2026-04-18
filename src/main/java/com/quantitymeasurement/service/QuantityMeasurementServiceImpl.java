@@ -10,8 +10,18 @@ import com.quantitymeasurement.model.QuantityModel;
 import com.quantitymeasurement.model.OperationType;
 import com.quantitymeasurement.unit.IMeasurable;
 import com.quantitymeasurement.repository.QuantityMeasurementRepository;
+import com.quantitymeasurement.dto.QuantityMeasurementDTO;
+import com.quantitymeasurement.repository.UserRepository;
+import com.quantitymeasurement.model.UserEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Collections;
 
 /**
  * QuantityMeasurementServiceImpl
@@ -27,12 +37,28 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
     );
 
     private QuantityMeasurementRepository repository;
+    private UserRepository userRepository;
 
     @Autowired
-    public QuantityMeasurementServiceImpl(QuantityMeasurementRepository repository) {
+    public QuantityMeasurementServiceImpl(QuantityMeasurementRepository repository, UserRepository userRepository) {
         this.repository = repository;
+        this.userRepository = userRepository;
         logger.info("QuantityMeasurementServiceImpl initialized with repository: "
             + repository.getClass().getSimpleName());
+    }
+
+    /**
+     * Helper to save a measurement entity conditionally only if the user is authenticated.
+     */
+    private void saveConditionally(QuantityMeasurementEntity entity) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
+            String username = auth.getName();
+            userRepository.findByUsername(username).ifPresent(user -> {
+                entity.setUser(user);
+                repository.save(entity);
+            });
+        }
     }
 
     /**
@@ -85,7 +111,7 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
 
         boolean result = compareBaseValues(q1, q2);
 
-        repository.save(buildEntity(
+        saveConditionally(buildEntity(
             q1, q2, OperationType.COMPARE, result ? "Equal" : "Not Equal", false, null
         ));
 
@@ -118,7 +144,7 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
 
         QuantityModel<IMeasurable> resultModel = new QuantityModel<>(result, target.getUnit());
 
-        repository.save(buildEntity(
+        saveConditionally(buildEntity(
             source, source, OperationType.CONVERT, resultModel, false, null
         ));
 
@@ -157,7 +183,7 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
 
         QuantityModel<IMeasurable> resultModel = new QuantityModel<>(result, target.getUnit());
 
-        repository.save(buildEntity(
+        saveConditionally(buildEntity(
             q1, q2, OperationType.ADD, resultModel, false, null
         ));
 
@@ -187,7 +213,7 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
 
         QuantityModel<IMeasurable> resultModel = new QuantityModel<>(result, target.getUnit());
 
-        repository.save(buildEntity(
+        saveConditionally(buildEntity(
             q1, q2, OperationType.SUBTRACT, resultModel, false, null
         ));
 
@@ -204,7 +230,7 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
 
         double result = performArithmetic(q1, q2, ArithmeticOperation.DIVIDE);
 
-        repository.save(buildEntity(
+        saveConditionally(buildEntity(
             q1, q2, OperationType.DIVIDE, String.valueOf(result), false, null
         ));
 
@@ -326,5 +352,58 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
             default: throw new IllegalArgumentException("Invalid arithmetic operation");
         }
         return op.applyAsDouble(base1, base2);
+    }
+
+    @Override
+    public List<QuantityMeasurementDTO> getHistory() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
+            String username = auth.getName();
+            UserEntity user = userRepository.findByUsername(username).orElse(null);
+            if (user != null) {
+                return QuantityMeasurementDTO.fromEntityList(repository.findByUserId(user.getId()));
+            }
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Map<String, Object> getHistoryStats() {
+        Map<String, Object> stats = new HashMap<>();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
+            String username = auth.getName();
+            userRepository.findByUsername(username).ifPresent(user -> {
+                Long userId = user.getId();
+                stats.put("total", repository.countByUserId(userId));
+                stats.put("comparisons", repository.countByUserIdAndOperation(userId, OperationType.COMPARE));
+                stats.put("conversions", repository.countByUserIdAndOperation(userId, OperationType.CONVERT));
+                stats.put("additions", repository.countByUserIdAndOperation(userId, OperationType.ADD));
+                stats.put("subtractions", repository.countByUserIdAndOperation(userId, OperationType.SUBTRACT));
+            });
+        }
+        
+        if (stats.isEmpty()) {
+            stats.put("total", 0L);
+            stats.put("comparisons", 0L);
+            stats.put("conversions", 0L);
+            stats.put("additions", 0L);
+            stats.put("subtractions", 0L);
+        }
+        
+        return stats;
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public void deleteHistory() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
+            String username = auth.getName();
+            userRepository.findByUsername(username).ifPresent(user -> {
+                repository.deleteByUserId(user.getId());
+                logger.info("Measurement memory perfectly flushed natively for UID: " + user.getId());
+            });
+        }
     }
 }

@@ -71,6 +71,13 @@
   - Restructured packages by safely isolating Data Transfer Objects and database models into a centralized `model` package (`QuantityDTO`, `QuantityInputDTO`, `QuantityMeasurementDTO`, `QuantityMeasurementEntity`).
   - Optimized the Java 17 record-like Boilerplate code utilizing **Lombok** `@Data`, `@Builder`, and generated constructor injections.
 
+- 🧩 **UC18 – Authentication and User Management (Spring Security, JWT, OAuth2) :**
+  - Fully integrated **Spring Security** to provide stateless, robust API protection across all application domains.
+  - Implemented custom **JSON Web Token (JWT)** architecture for secure, session-less authentication routing seamlessly over typical HTTP architectures.
+  - Enabled external **OAuth2 Social Login** (Google/GitHub) alongside traditional local username/password registration.
+  - Intercepted default browser OAuth2 redirects to directly output programmatic JWTs via clean JSON responses suitable for REST APIs.
+  - Established rigorous **BCrypt** password hashing for local accounts and flawless database synchronization for external OAuth2 profiles natively.
+
 ### 🧰 Tech Stack
 
 - **Java 17+** 
